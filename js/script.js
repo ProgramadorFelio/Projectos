@@ -1,67 +1,5 @@
- const mensagens=[
-           {
-             id:1,
-            categoria:"Motivacao",
-            text:"Acredite em si e nunca desista dos seus sonhos"
-           },
-           {
-             id:2,
-            categoria:"Motivacao",
-            text:"Cada pequeno pesso aproxima-te dos teus maiores objectivos"
-           },
-           {
-             id:3,
-            categoria:"Motivacao",
-            text:"Nao precisas de ser perfeito, apenas precisas de continuar"
-           },
-           {
-             id:4,
-            categoria:"Amor",
-            text:"O amor comeca quando quando aprendemos a cuidar tambem dos pequenos detalhes"
-           },
-           {
-            id:5,
-            categoria:"Amor",
-            text:"Onde existe carinho, ate os momentos simples se tornam especiais"
-           },
-           {
-            id:6,
-            categoria:"Sucesso",
-            text:"O sucesso e contruido com consciencia, paciencia e dedeicacao"
-           },
-           {
-            id:7,
-            categoria:"Sucesso",
-            text:"Grandes resultados comecam com decisoes pequenas, mas corajosas"
-           },
-           {
-            id:8,
-            categoria:"Amizade",
-            text:"Uma boa amizade torna os dias dificeis mais leves e os felizes ainda melhores"
-           },
-           {
-            id:9,
-            categoria:"Amizade",
-            text:"Amigos verdadeiros celebram a stuas conquistas e apoiam os teus recomecos"
-           },
-           {
-            id:10,
-            categoria:"Reflexao",
-            text:"As vezes, desacelerar e a melhor forma de perceber o que realmente importa"
-           },
-           {
-            id:11,
-            categoria:"Reflexao",
-            text:"O presente e o unico momento que podemos realmente transformar"
-           },
-           {
-            id:12,
-            categoria:"Motivacao",
-            text:"O teu futuro agradece cada esforco que fazes hoje"
-           }
-        ];
-        let categoriaActual="todas";
-        let mensagemActual=mensagens[0];
+let categoriaActual="todas";
+        let mensagemActual=null;
         //buscar os favoritos e o numero de visualizacoes no localStorage, se nao houver, inicializar com um array vazio e 0, isso no armazenamento local do navegador, para que os dados persistam mesmo apos fechar a pagina
         let favoritos=JSON.parse(localStorage.getItem('inspirarFavoritos')) || [];
         let Visualizadas=Number(localStorage.getItem("inspiraVisualizadas")) || 0;
@@ -69,6 +7,7 @@
         const quoteText=document.getElementById("quoteText");
         const quoteCategory=document.getElementById("quoteCategory");
         const quoteNumber=document.getElementById("quoteNumber");
+        const quoteAuthor=document.getElementById("quoteAuthor");
         const quoteCard=document.getElementById("quoteCard");
         const favoriteBtn=document.getElementById("favoriteBtn");
         const copybtn=document.getElementById("copybtn");
@@ -102,16 +41,19 @@
                 toast.classList.remove("show");//remover a classe "show" para ocultar o toast
             },2500);
         }
-        function obterMensagensFiltradas(){
-            if(categoriaActual==="todas"){
-                return mensagens;
-            }
-            return mensagens.filter(mensagem =>mensagem.categoria===categoriaActual);
+        // Fonte remota com milhares de frases organizadas por categorias.
+        // As frases não ficam escritas dentro deste HTML: são carregadas da Internet.
+        const FONTE_FRASES = "https://gist.githubusercontent.com/wandersonalwes/9935b8ef428683c9688471d603644b0c/raw/ed1fd98824f1b4119b72e7c73dc5d7363029610d/quotes.json";
+        let bancoFrases = null;
 
-        }
-        function obterIndiceAleatorio(lista){
-            return Math.floor(Math.random()*lista.length);
-        }
+        const categoriasRemotas = {
+            Motivacao: "Motivação",
+            Amor: "Amor",
+            Sucesso: "Sucesso",
+            Amizade: "Amizade",
+            Reflexao: "Reflexão"
+        };
+
         //funcao para copiar texto para a area de transferencia, utilizando a API do clipboard se disponivel, ou um fallback com textarea para navegadores mais antigos
         async function copiarTexto(texto){
             if(navigator.clipboard && window.isSecureContext){//como se fosse API do navegador que permite ler ou escrever na area de transferencia
@@ -134,11 +76,14 @@
             //actualizar a mensagem actual, o texto, a categoria e o numero da mensagem
             mensagemActual=mensagem;
             quoteText.textContent=mensagem.text;
+            quoteAuthor.textContent=`- ${mensagem.autor || "Inspira+"}`;
             quoteCategory.textContent=` ${mensagem.categoria.toUpperCase()}`;//toUpperCase() para deixar a categoria em maiusculo
-            const lista=obterMensagensFiltradas();
-            const posicao=lista.findIndex(item=>item.id===mensagem.id);
-            //actualizar o numero da mensagem atual e o total de mensagens filtradas, formatando com dois digitos
-            quoteNumber.textContent=`${String(posicao + 1).padStart(2, "0")}/${String(lista.length).padStart(2,"0") }` ;
+            // Como a mensagem é carregada diretamente da Internet, não existe
+            // um total local de mensagens. O indicador mostra a sequência da sessão.
+            const sequencia = Number(sessionStorage.getItem("inspiraSequencia")) || 0;
+            const novaSequencia = sequencia + 1;
+            sessionStorage.setItem("inspiraSequencia", novaSequencia);
+            quoteNumber.textContent=`${String(novaSequencia).padStart(2, "0")}/∞`;
             if(contarVisualizacao){
                 Visualizadas ++;
                 guardarDados();
@@ -151,20 +96,75 @@
             quoteCard.classList.add("animate");
         }
 
-        function gerarNovaMensagem(){
-            const lista=obterMensagensFiltradas();
-            if(lista.length===0)return;
-            let novaMensagem;
+        async function carregarBancoFrases(){
+            if(bancoFrases) return bancoFrases;
 
-            if(lista.length>1){
-                do{
-                    novaMensagem=lista[obterIndiceAleatorio(lista)];
-                }while(novaMensagem.id===mensagemActual.id);
-            }else{
-                novaMensagem=lista[0];
-            }
-            mostrarmensagem(novaMensagem);
+            const resposta = await fetch(FONTE_FRASES, { cache: "no-store" });
+            if(!resposta.ok) throw new Error("Não foi possível carregar as frases da Internet.");
+
+            const dados = await resposta.json();
+            if(!Array.isArray(dados)) throw new Error("Formato de frases inválido.");
+
+            bancoFrases = dados;
+            return bancoFrases;
         }
+
+        function escolherFrase(lista, categoria){
+            if(!lista.length) return null;
+
+            const item = lista[Math.floor(Math.random() * lista.length)];
+            const texto = typeof item === "string" ? item : (item.quote || item.frase || item.text || "");
+            const autor = typeof item === "object" && item.author ? item.author : "Inspira+";
+
+            return {
+                id: Date.now() + Math.random(),
+                categoria,
+                text: texto,
+                autor
+            };
+        }
+
+        async function gerarNovaMensagem(){
+            quoteText.textContent = "A carregar uma nova mensagem...";
+            quoteCategory.textContent = categoriaActual === "todas" ? "INSPIRA+" : categoriaActual.toUpperCase();
+
+            try {
+                const banco = await carregarBancoFrases();
+                let lista = [];
+
+                if(categoriaActual === "todas"){
+                    // Em "Todas", usamos somente as 5 categorias do Inspira+.
+                    const nomes = Object.values(categoriasRemotas);
+                    lista = banco.filter(item => nomes.includes(item?.name));
+
+                    if(lista.length){
+                        // Escolhe uma categoria e depois uma frase dessa categoria.
+                        const grupo = lista[Math.floor(Math.random() * lista.length)];
+                        mensagemActual = escolherFrase(grupo.quotes || [], grupo.name);
+                    }
+                } else {
+                    const nomeRemoto = categoriasRemotas[categoriaActual];
+                    const grupo = banco.find(item => item?.name === nomeRemoto);
+
+                    if(grupo && Array.isArray(grupo.quotes)){
+                        mensagemActual = escolherFrase(grupo.quotes, categoriaActual);
+                    }
+                }
+
+                if(!mensagemActual || !mensagemActual.text){
+                    throw new Error("A categoria não foi encontrada na fonte de frases.");
+                }
+
+                mostrarmensagem(mensagemActual);
+
+            } catch(erro) {
+                console.error(erro);
+                quoteText.textContent = "Não foi possível carregar as mensagens da Internet.";
+                quoteCategory.textContent = "ERRO";
+                MostrarToast("Erro ao buscar mensagens", "fa-solid fa-triangle-exclamation");
+            }
+        }
+
         //actualizar o estado do botao de favorito, adicionando ou removendo a classe "is-favorite" e alterando o icone
         function actualizarBotaoFavorito(){
             const favorito=favoritos.some(item=>item.id===mensagemActual.id);
@@ -199,9 +199,8 @@
             if(!botaoCategoria)return;
             categoriaActual=botaoCategoria.dataset.category;
             document.querySelectorAll(".category").forEach(item=>item.classList.toggle("active", item===botaoCategoria));
-            const lista=obterMensagensFiltradas();
-            categoryResult.textContent=`${lista.length} mensagem${lista.length===1 ? "" : "s"}`;
-            mostrarmensagem(lista[0], false);
+            categoryResult.textContent = categoriaActual === "todas" ? "Mensagens motivacionais da Internet" : "Mensagens da categoria " + categoriaActual;
+            gerarNovaMensagem();
         });
         //adicionar ou remover a mensagem actual dos favoritos, actualizando o armazenamento local, o estado do botao de favorito, as estatisticas e a lista de favoritos renderizada
 
@@ -236,6 +235,6 @@
             if(copiar){ const item=favoritos.find(favorito=>favorito.id === Number(copiar.dataset.copy)); if(item) copiarTexto(item.text).then(()=>MostrarToast("Mensagem copiada")); }
         });
 
-        mostrarmensagem(mensagens[0], false);
+        gerarNovaMensagem();
         actualizarEstatisticas();
         renderizarFavoritos();
