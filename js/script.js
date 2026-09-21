@@ -2,12 +2,12 @@ let categoriaActual="todas";
         let mensagemActual=null;
         //buscar os favoritos e o numero de visualizacoes no localStorage, se nao houver, inicializar com um array vazio e 0, isso no armazenamento local do navegador, para que os dados persistam mesmo apos fechar a pagina
         let favoritos=JSON.parse(localStorage.getItem('inspirarFavoritos')) || [];
-        let Visualizadas=Number(localStorage.getItem("inspiraVisualizadas")) || 0;
+        let Visualizadas=Number(localStorage.getItem("inspiraVisualizados")) || 0;
 
         const quoteText=document.getElementById("quoteText");
         const quoteCategory=document.getElementById("quoteCategory");
         const quoteNumber=document.getElementById("quoteNumber");
-        const quoteAuthor=document.getElementById("quoteAuthor");
+        const quoteAuthor=document.querySelector(".quote-author");
         const quoteCard=document.getElementById("quoteCard");
         const favoriteBtn=document.getElementById("favoriteBtn");
         const copybtn=document.getElementById("copybtn");
@@ -72,7 +72,7 @@ let categoriaActual="todas";
         }
 
         function mostrarmensagem(mensagem,contarVisualizacao=true){
-            if(!mensagem)return;
+                    if(!mensagem || !quoteAuthor)return;
             //actualizar a mensagem actual, o texto, a categoria e o numero da mensagem
             mensagemActual=mensagem;
             quoteText.textContent=mensagem.text;
@@ -205,6 +205,7 @@ let categoriaActual="todas";
         //adicionar ou remover a mensagem actual dos favoritos, actualizando o armazenamento local, o estado do botao de favorito, as estatisticas e a lista de favoritos renderizada
 
         favoriteBtn.addEventListener("click", ()=>{
+                    if(!mensagemActual)return;
             const indice=favoritos.findIndex(item=>item.id===mensagemActual.id);
             if(indice >= 0){ favoritos.splice(indice, 1); MostrarToast("Removida dos favoritos"); }
             else { favoritos.push(mensagemActual); MostrarToast("Adicionada aos favoritos"); }
@@ -213,10 +214,12 @@ let categoriaActual="todas";
         //adicionar event listeners para copiar, partilhar, gerar nova mensagem, alterar tema, pesquisar e interagir com lista de favoritos
 
         copybtn.addEventListener("click", async ()=>{
+                    if(!mensagemActual)return;
             await copiarTexto(mensagemActual.text);
             MostrarToast("Mensagem copiada");
         });
         sharebtn.addEventListener("click", async ()=>{
+                    if(!mensagemActual)return;
             if(navigator.share) await navigator.share({title:"Inspira+", text:mensagemActual.text});
             else { await copiarTexto(mensagemActual.text); MostrarToast("Mensagem copiada"); }
         });
@@ -228,6 +231,7 @@ let categoriaActual="todas";
             themeIcon.className=document.body.classList.contains("dark") ? "fa-solid fa-moon" : "fa-solid fa-sun";
         });
         searchInput.addEventListener("input", renderizarFavoritos);
+        searchInput.form?.addEventListener("submit", event=>event.preventDefault());
         favoritesList.addEventListener("click", event=>{
             const remover=event.target.closest("[data-remove]");
             if(remover){ favoritos=favoritos.filter(item=>item.id !== Number(remover.dataset.remove)); guardarDados(); actualizarEstatisticas(); renderizarFavoritos(); }
