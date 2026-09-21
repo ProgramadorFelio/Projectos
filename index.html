@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Inspira+</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css">
+
+    <style> 
+    </style>
+  </head>
+  <body>
+    <header class="header">
+        <a href="#" class="logo">
+            <span class="logo-icon"><i class="fa-solid fa-diamond"></i></span>Inspira<span>+</span>
+        </a>
+        <nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <div class="container-fluid">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="#">Inicio</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Link</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Dropdown
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Action</a></li>
+            <li><a class="dropdown-item" href="#">Another action</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#">Something else here</a></li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<button class="theme-btn" id="themeBtn" aria-label="alterar tema">
+    <i class="fa-solid fa-sun" id="themeIcon"></i>
+</button>
+    </header>
+
+    <main class="main">
+        <section class="hero">
+            <div class="hero-badge"><i class="fa-solid fa-diamond"></i>Um momento de Inspiracao</div>
+            <h1>
+                Uma mensagem pode <br><span>Mudar o teu dia </span>
+            </h1>
+            <p>
+                Encontra Inspiracao, motivacao e boas palavras para cada momento.
+            </p>
+        </section>
+        <section class="categorias-section">
+            <div class="section-heading">
+                <h2>Explora por Categorias</h2>
+                <span id="categoryResult"> Todas as mensagens</span>
+            </div>
+          <div class="categorias" id="categorias">
+            <button class="category active" data-category="todas"><i class="fa-solid fa-diamond"></i>Todas</button>
+            <button class="category" data-category="Motivacao"><i class="fa-solid fa-rocket"></i>Motivacao</button>
+            <button class="category" data-category="Amor"><i class="fa-solid fa-heart"></i>Amor</button>
+            <button class="category" data-category="Sucesso"><i class="fa-solid fa-trophy"></i>Sucesso</button>
+            <button class="category" data-category="Amizade"><i class="fa-solid fa-users"></i>Amizade</button>
+            <button class="category" data-category="Reflexao"><i class="fa-solid fa-user"></i>Reflexao</button>
+          </div>
+        </section>
+
+        <section class="quote-section">
+            <div class="quote-card" id="quoteCard">
+                <div class="quote-top">
+                    <span class="quote-label" id="quoteCategory">motivacao</span>
+                    <i class="fa-solid fa-heart" id="favoriteBtn" aria-label="Adicionar favoritos"></i>
+                </div>
+                <div class="quote-content">
+                    <span class="quote-mark">"</span>
+                    <p id="quoteText">
+                        Acredita em si mesmo e nunca desita dos seus sonhos.
+                    </p>
+                    <span class="quote-mark quote-mark-bottom">"</span>
+                </div>
+                <div class="quote-bottom">
+                    <span class="quote-author">-Inspira+</span>
+                    <span class="quote-number" id="quoteNumber">01 / 10</span>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="action-btn" id="copybtn">
+                    <span><i class="fa-solid fa-copy"></i>Copiar</span>
+                </button>
+                <button class="action-btn" id="sharebtn">
+                    <span><i class="fa-solid fa-share"></i>Partilhar</span>
+                </button>
+                      <button class="action-btn" id="newMessageBtn" type="button">
+                          <span><i class="fa-solid fa-message"></i>Nova Mensagem</span>
+                </button>
+            </div>
+        </section>
+        <section class="library-section" id="librarySection">
+            <div class="library-header">
+                <div>
+                    <h2 id="libraryTitle">
+                        As tuas mensagens Favoritas
+                    </h2>
+                    <p id="librarySubtitle">
+                        Guarda as frases que mais significam para ti
+                    </p>
+                </div>
+                <div class="stats">
+                    <div class="stat">
+                        <strong id="viewCount">0</strong>
+                        <span>Visualizadas</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="favoriteStat">0</strong>
+                        <span>Favoritas</span>
+                    </div>
+                </div>
+            </div>
+            <form class="d-flex" role="search">
+             <input class="form-control me-2" id="searchInput" type="search" placeholder="Pesquisar mensagens" aria-label="Search"/>
+             <button class="btn btn-outline-info" type="submit">Search</button>
+            </form>
+            <div class="favorites-list" id="favoritesList"></div>
+        </section>
+    </main>
+    <div class="toast" id="toast">
+        <span id="toastIcon"><i class="fa-solid fa-certificate"></i></span>
+        <span id="toastMessage">Mensagem Copiada</span>
+    </div>
+    <footer class="footer">
+        <p>
+            Feito com <span><i class="fa-solid fa-heart"></i> para inspirar teu dia</span>
+        </p>
+        <p class="footer-copy">
+            @2026 Inspira+
+        </p>
+    </footer>
+   
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+  </body>
+</html>
